@@ -1,10 +1,8 @@
-const loadFunction = async(query=' ') =>{
+const loadFunction = async(query='') =>{
     const res = await fetch(`https://openapi.programming-hero.com/api/retro-forum/posts${query}`);
     // const url = `https://openapi.programming-hero.com/api/retro-forum${query}`;
     // console.log(url);
     const data = await res.json();
-    // console.log(data)
-    console.log(data.posts);
     displayFunction(data.posts);
 }
 const displayFunction = (posts) =>{
@@ -12,12 +10,16 @@ const displayFunction = (posts) =>{
     const allPostContainer = document.getElementById('all-post-container');
     allPostContainer.textContent = '';
     posts.forEach(post => {
+        let color = 'bg-green-500';
+        if(!post.isActive){
+            color = 'bg-red-500';
+        }
         const newDiv = document.createElement('div');
-        newDiv.classList = `bg-gray-200 rounded-2xl p-10 flex gap-x-4`;
+        newDiv.classList = `post-card overflow-hidden bg-gray-200 rounded-2xl p-10 flex gap-x-4`;
         newDiv.innerHTML = `
-            <div class="relative w-1/12">
+                        <div class="relative w-1/12">
                             <img class="rounded-2xl" src="${post.image}" alt="">
-                            <span class="absolute top-0 right-0 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></span>
+                            <span class="absolute top-0 right-0 w-5 h-5 ${color} rounded-full border-2 border-white"></span>
                         </div>
 
                         <!-- text content -->
@@ -40,13 +42,14 @@ const displayFunction = (posts) =>{
                                 <p class="flex gap-x-1"><span>${post.posted_time}</span> min</p>
                                 </li>
                             </ul>
-                            <button class="btn ml-120 bg-gray-200">
+                            <button onclick="handleMarkRead(this,'${post.title.replace(/'/g,"\\'")}}','${post.view_count}')" class="selected-post btn ml-120 bg-gray-200">
                                 <img src="images/inbox.png" alt="">
                             </button>
                             </div>
                         </div>
         `;
         allPostContainer.appendChild(newDiv);
+        // console.log(newDiv)
     })
 }
 const handleSearch = () =>{
@@ -54,6 +57,29 @@ const handleSearch = () =>{
     const inputValue = inputText.value;
     loadFunction(`?category=${inputValue}`);
     // console.log(`?category=${inputValue}`)
+}
+let count = 0;
+const handleMarkRead = (btn,id,view) =>{
+    count++;
+
+    const newDiv = document.createElement('div');
+    newDiv.classList = `flex justify-around gap-x-2 bg-white p-2 rounded-2xl items-center`;
+    newDiv.innerHTML = `
+        <p id="post-title" class="w-4/6">${id}</p>
+                        <p id="post-view" class="w-5"><img src="images/eye-regular-full.svg" alt=""></p>
+                        <p>${view}</p>
+    `;
+    const postContainer = document.getElementById('post-container');
+    postContainer.appendChild(newDiv);
+    
+    const postCountText = document.getElementById('post-count');
+    postCountText.innerText = count;
+
+    const parentCard = btn.closest('.post-card');
+    parentCard.classList.remove('bg-gray-200');
+  parentCard.classList.add('bg-blue-200', 'border-2', 'border-[#797DFC]');
+    
+
 }
 
 const loadLatestPost = async() =>{
@@ -64,6 +90,14 @@ const loadLatestPost = async() =>{
 const displayLatestPost = (latestposts) => {
     // console.log(latestposts[0]);
     latestposts.forEach(post => {
+        let date = post.author.posted_date;
+        let designation = post.author.designation
+        if(!date){
+            date = 'No publish date';
+        }
+        if(!designation){
+            designation = 'Unknown';
+        }
         const latestPostContainer = document.getElementById('latest-post-container');
         const newDiv = document.createElement('div');
         newDiv.classList = `card bg-base-100 shadow-sm p-5`;
@@ -74,7 +108,7 @@ const displayLatestPost = (latestposts) => {
                     <div class="card-body">
                         <div class="flex gap-x-3 items-center">
                             <i class="fa-regular fa-calendar text-3xl"></i>
-                            <p class="text-xl">${post.author.posted_date}</p>
+                            <p class="text-xl">${date}</p>
                         </div>
                         <h2 class="card-title font-bold text-2xl">${post.title}</h2>
                         <p>${post.description}</p>
@@ -84,7 +118,7 @@ const displayLatestPost = (latestposts) => {
                             </div>
                             <div>
                                 <h1 class="font-bold">${post.author.name}</h1>
-                                <p>${post.author.designation}</p>
+                                <p>${designation}</p>
                             </div>
                         </div>
                     </div>
@@ -94,4 +128,5 @@ const displayLatestPost = (latestposts) => {
 }
 
 loadFunction('');
-loadLatestPost();
+// loadLatestPost();
+
