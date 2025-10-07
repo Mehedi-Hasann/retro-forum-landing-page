@@ -128,5 +128,5 @@ const displayLatestPost = (latestposts) => {
 }
 
 loadFunction('');
-// loadLatestPost();
+loadLatestPost();
 
